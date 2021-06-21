@@ -46,5 +46,9 @@ def get():
 if len(sys.argv) < 1:
     print ("No port input")
 s = serial.Serial(sys.argv[1])
+while True:
+    a = s.readline()
+    print("s.read: ", a.decode())
+
 while get():
     i = 0

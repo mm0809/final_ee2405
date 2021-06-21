@@ -48,7 +48,21 @@ int main() {
     //    ask_for_apriltag_angle();
     //    //char cmd = receive_from_cam();
     //}
+    char s[] = "ready\r\n";
+    xbee.write(s, sizeof(s));
     while(1) {
+
+        if (state == 1) {
+            float dis = get_dis();
+            char s[] = "stop\r\n";
+            if (dis <= 25.0) {
+                state = 2;
+
+                xbee.write(s, sizeof(s));
+
+                car.stop();
+            }
+        }
         printf("state: %d\r\n", state);
         if (state == 0) {
             if (cam.readable()) {
@@ -66,7 +80,7 @@ int main() {
             }
 
             float distance = get_dis();
-            if (state == 0 && distance <= 15) {
+            if (state == 0 && distance <= 22.0) {
                 state = 1;
 
                 car.stop();
@@ -77,14 +91,23 @@ int main() {
                  
                 // turn 180
                 car.turn(100, 0.3);
-                ThisThread::sleep_for(2000ms);
+                ThisThread::sleep_for(2700ms);
                 car.stop();
             }
         } else if (state == 1) {
-            ThisThread::sleep_for(1000ms);
+            float dis = get_dis();
+            char s[] = "stop\r\n";
+            if (dis <= 25.0) {
+                state = 2;
+
+                xbee.write(s, sizeof(s));
+
+                car.stop();
+            }
+            ThisThread::sleep_for(100ms);
             ask_for_apriltag_angle();
             char cmd = receive_from_cam();
-            printf("april: %c\r\n", cmd);
+            //printf("april: %c\r\n", cmd);
 
             if (cmd == 'f') {
                 goF(80);
@@ -93,6 +116,15 @@ int main() {
             } else if (cmd == 'r') {
                 goR(90, -60);
             }
+
+            //printf("%lf\r\n", dis);
+        } else if (state == 2) {
+            char s[] = "done\r\n";
+            xbee.write(s, sizeof(s));
+            state = 3;
+            car.stop();
+        } else {
+            car.stop();
         }
     }
 } 
