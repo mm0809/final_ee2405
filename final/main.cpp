@@ -103,11 +103,14 @@ int main() {
                 xbee.write(s, sizeof(s));
 
                 car.stop();
+                ThisThread::sleep_for(2700ms);
+                printf("state(2): %d\r\n", state);
+                //break;
             }
             ThisThread::sleep_for(100ms);
             ask_for_apriltag_angle();
             char cmd = receive_from_cam();
-            //printf("april: %c\r\n", cmd);
+            printf("april: %c\r\n", cmd);
 
             if (cmd == 'f') {
                 goF(80);
@@ -122,11 +125,13 @@ int main() {
             char s[] = "done\r\n";
             xbee.write(s, sizeof(s));
             state = 3;
-            car.stop();
+            while(1)
+                car.stop();
         } else {
             car.stop();
         }
     }
+    car.stop();
 } 
 float get_dis() {
     float val;

@@ -7,6 +7,7 @@ sensor.set_framesize(sensor.QQVGA)
 sensor.skip_frames(time = 2000)
 clock = time.clock()
 last_state = 0
+last_april = 0
 task_state = 1
 # All lines also have `x1()`, `y1()`, `x2()`, and `y2()` methods to get their end-points
 # and a `line()` method to get all the above as one 4 value tuple for `draw_line()`.
@@ -64,6 +65,7 @@ def degrees(radians):
     return (180 * radians) / math.pi
 
 def april_tag_detact():
+    global last_april
     cnt = 0
     f_x = (2.8 / 3.984) * 160
     f_y = (2.8 / 2.952) * 120
@@ -81,12 +83,27 @@ def april_tag_detact():
         print("x: ", tag_x, " y: ", tag_y)
         if tag_x >= 75 and tag_x <= 85:
             print("f")
+            last_april = 1
             uart.write(("f").encode())
         elif tag_x <= 60:
             print("r")
+            last_april = 2
             uart.write(("r").encode())
         elif tag_x >= 85:
             print("l")
+            last_april = 3
+            uart.write(("l").encode())
+        elif last_april == 1:
+            print("f")
+            last_april = 1
+            uart.write(("f").encode())
+        elif last_april == 2:
+            print("r")
+            last_april = 2
+            uart.write(("r").encode())
+        elif last_april == 3:
+            print("l")
+            last_april = 3
             uart.write(("l").encode())
         #uart.write(("#%d!" % print_args).encode())
     if cnt is 0:
@@ -117,12 +134,4 @@ while(True):
         april_tag_detact()
     if task_state == 1:
         find_line_test()
-   #print(sensor.get_windowing())
-   # `merge_distance` controls the merging of nearby lines. At 0 (the default), no
-   # merging is done. At 1, any line 1 pixel away from another is merged... and so
-   # on as you increase this value. You may wish to merge lines as line segment
-   # detection produces a lot of line segment results.
-
-   # `max_theta_diff` controls the maximum amount of rotation difference between
-   # any two lines about to be merged. The default setting allows for 15 degrees.
 
